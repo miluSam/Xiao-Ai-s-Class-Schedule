@@ -9,10 +9,50 @@ async function scheduleTimer({
     setTimeout(() => resolve(), 1)
   })
   await someAsyncFunc();
+  await loadTool('AIScheduleTools')
+  const startDate = await AISchedulePrompt({
+    titleText: '开学时间',
+    tipText: '请输入(更改)本学年开学时间，格式为 20XX,X,XX',
+    defaultText: '2025,2,17',
+    validator: value => {
+        // 检查输入是否符合 20XX,X,XX 格式
+        const regex = /^20\d{2},\d{1,2},\d{1,2}$/;
+        if (!regex.test(value)) {
+            return '请输入正确的日期格式，如 20XX,X,XX';
+        }
+
+        // 解析输入的日期
+        const [year, month, day] = value.split(',').map(Number);
+
+        // 检查日期的有效性
+        const date = new Date(year, month - 1, day);
+        if (isNaN(date.getTime()) || date.getFullYear()!== year || date.getMonth()!== month - 1 || date.getDate()!== day) {
+            return '请输入有效的日期';
+        }
+
+        // 检查年份范围
+        if (year < 2000 || year > 2100) {
+            return '请输入 2000 到 2100 之间的年份';
+        }
+
+        return false;
+    }
+});
+
+  let startDateObj;
+  // 后续处理
+  if (startDate) {
+    const [year, month, day] = startDate.split(',').map(Number);
+    startDateObj = new Date(year, month - 1, day);
+    console.log('用户输入的开学时间:', startDateObj);
+  } else {
+    console.log('用户未输入有效的开学时间');
+    // 可以根据实际情况进行处理，这里简单使用默认日期
+    startDateObj = new Date(2025, 1, 17);
+  }
 
   // 生成开学时间的时间戳
-  const startDate = new Date(2025, 1, 17); // 假设开学时间是 2025 年 2 月 17 日
-  const startSemester = startDate.getTime().toString().padEnd(13, '0');
+  const startSemester = startDateObj.getTime().toString().padEnd(13, '0');
 
   // 返回时间配置JSON，所有项都为可选项，如果不进行时间配置，请返回空对象
   return {
