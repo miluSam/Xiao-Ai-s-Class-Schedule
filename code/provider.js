@@ -30,8 +30,10 @@ async function scheduleHtmlProvider() {
             return JSON.stringify([]);  // 如果没有课程，返回空数组的 JSON 字符串
         }
     } catch (error) {
+        await AIScheduleAlert('未知错误，请确定你已经登录URP');
         console.error('发生错误:', error);
-        return JSON.stringify([]);  // 错误时返回空数组
+        return 'do not continue';
+
     }
 }
 
